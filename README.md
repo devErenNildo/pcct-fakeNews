@@ -88,4 +88,76 @@ A plataforma será baseada em **microservices**, garantindo **alta escalabilidad
 🔹 **Análise de Engajamento** – Relatórios de participação para professores.  
 🔹 **Plataforma Aberta para APIs** – Para futuras integrações com sistemas escolares.  
 
-Essa estrutura faz sentido para você? Quer ajustar algo ou já começamos com o **desenvolvimento do backend**? 🚀
+---
+
+## Diagrama Inicial
+```mermaid
+erDiagram
+    USER {
+        UUID id
+        STRING name
+        STRING email
+        STRING password
+        STRING role  "Enum: STUDENT, TEACHER, ADMIN"
+    }
+    
+    CLASSROOM {
+        UUID id
+        STRING name
+        UUID teacher_id
+    }
+    
+    CHAT {
+        UUID id
+        STRING type  "Enum: PRIVATE, CLASSROOM, GENERAL"
+    }
+    
+    MESSAGE {
+        UUID id
+        UUID chat_id
+        UUID sender_id
+        TEXT content
+        TIMESTAMP sent_at
+    }
+    
+    VIDEO_CALL {
+        UUID id
+        UUID classroom_id
+        UUID host_id
+        TIMESTAMP start_time
+        TIMESTAMP end_time
+    }
+    
+    TASK {
+        UUID id
+        UUID classroom_id
+        STRING title
+        TEXT description
+        TIMESTAMP deadline
+    }
+    
+    RANKING {
+        UUID id
+        UUID user_id
+        INT points
+    }
+    
+    MATERIAL {
+        UUID id
+        UUID classroom_id
+        STRING title
+        STRING file_url
+    }
+    
+    USER ||--o{ CLASSROOM : "participa"
+    USER ||--o{ CHAT : "envia mensagens"
+    CLASSROOM ||--o{ CHAT : "possui"
+    CHAT ||--o{ MESSAGE : "contém"
+    USER ||--o{ MESSAGE : "envia"
+    CLASSROOM ||--o{ VIDEO_CALL : "realiza"
+    USER ||--o{ VIDEO_CALL : "participa"
+    CLASSROOM ||--o{ TASK : "tem"
+    USER ||--o{ RANKING : "possui"
+    CLASSROOM ||--o{ MATERIAL : "disponibiliza"
+
+
