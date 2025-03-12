@@ -159,5 +159,153 @@ erDiagram
     CLASSROOM ||--o{ TASK : "tem"
     USER ||--o{ RANKING : "possui"
     CLASSROOM ||--o{ MATERIAL : "disponibiliza"
+```
 
+## System design monito
+```mermaid
+graph LR
+    subgraph Clientes
+        User["📱 Usuário (Aluno/Professor/Admin)"]
+        Browser["🖥️ Navegador Web"]
+        MobileApp["📱 App Mobile"]
+    end
 
+    subgraph Frontend
+        WebApp["🌐 Aplicação Angular/React"]
+    end
+
+    subgraph Backend
+        API["⚙️ API Spring Boot"]
+        AuthService["🔑 Serviço de Autenticação (JWT)"]
+        ChatService["💬 Serviço de Chat (WebSocket)"]
+        VideoService["🎥 Serviço de Videochamada (WebRTC)"]
+        TaskService["📚 Serviço de Tarefas"]
+        RankingService["🏆 Serviço de Gamificação"]
+    end
+
+    subgraph Banco de Dados
+        DBMain["🗄️ PostgreSQL (Users, Tasks, Messages)"]
+        DBRedis["⚡ Redis (Cache de mensagens e ranking)"]
+    end
+
+    subgraph Infraestrutura
+        LoadBalancer["⚖️ Load Balancer"]
+        Gateway["🚪 API Gateway"]
+        Storage["🗄️ AWS S3 (Arquivos e vídeos)"]
+    end
+
+    User -->|HTTP| Browser
+    User -->|API REST| MobileApp
+
+    Browser -->|API REST| Gateway
+    MobileApp -->|API REST| Gateway
+
+    Gateway -->|Balanceamento| LoadBalancer
+    LoadBalancer -->|Escala Horizontal| API
+
+    API --> AuthService
+    API --> ChatService
+    API --> VideoService
+    API --> TaskService
+    API --> RankingService
+    API -->|SQL Queries| DBMain
+    API -->|Cache| DBRedis
+
+    VideoService --> Storage
+    ChatService --> DBRedis
+
+    RankingService --> DBRedis
+    TaskService --> DBMain
+
+    Storage -->|Acesso a arquivos| API
+```
+
+## System design microservice
+```mermaid
+graph LR
+    subgraph Clientes
+        User["📱 Usuário (Aluno/Professor/Admin)"]
+        Browser["🖥️ Navegador Web"]
+        MobileApp["📱 App Mobile"]
+    end
+
+    subgraph API Gateway
+        Gateway["🚪 API Gateway (Spring Cloud Gateway)"]
+    end
+
+    subgraph Load Balancer
+        LoadBalancer["⚖️ Load Balancer"]
+    end
+
+    subgraph Microservices
+        AuthService["🔑 Autenticação (JWT, OAuth)"]
+        UserService["👤 Gerenciamento de Usuários"]
+        ClassService["🏫 Turmas e Salas"]
+        ChatService["💬 Chat (WebSocket)"]
+        VideoService["🎥 Videochamada (WebRTC)"]
+        TaskService["📚 Tarefas e Provas"]
+        RankingService["🏆 Gamificação e Ranking"]
+        NotificationService["📢 Notificações (E-mail, Push)"]
+    end
+
+    subgraph Banco de Dados
+        DBMain["🗄️ PostgreSQL (Users, Tasks, Chats)"]
+        DBRedis["⚡ Redis (Cache e Ranking)"]
+    end
+
+    subgraph Mensageria
+        Kafka["📩 Apache Kafka / RabbitMQ"]
+    end
+
+    subgraph Storage
+        S3["🗄️ AWS S3 (Arquivos e vídeos)"]
+    end
+
+    subgraph Infraestrutura
+        Kubernetes["☸️ Kubernetes (Orquestração)"]
+        Docker["🐳 Docker Containers"]
+    end
+
+    User -->|REST API| Browser
+    User -->|REST API| MobileApp
+
+    Browser -->|REST API| Gateway
+    MobileApp -->|REST API| Gateway
+
+    Gateway -->|Balanceamento| LoadBalancer
+    LoadBalancer -->|Roteamento| AuthService
+    LoadBalancer -->|Roteamento| UserService
+    LoadBalancer -->|Roteamento| ClassService
+    LoadBalancer -->|Roteamento| ChatService
+    LoadBalancer -->|Roteamento| VideoService
+    LoadBalancer -->|Roteamento| TaskService
+    LoadBalancer -->|Roteamento| RankingService
+    LoadBalancer -->|Roteamento| NotificationService
+
+    AuthService --> DBMain
+    UserService --> DBMain
+    ClassService --> DBMain
+    TaskService --> DBMain
+    RankingService --> DBRedis
+
+    ChatService --> DBRedis
+    ChatService --> Kafka
+    VideoService --> S3
+
+    NotificationService --> Kafka
+    NotificationService --> DBMain
+
+    Kafka --> NotificationService
+    Kafka --> ChatService
+    Kafka --> TaskService
+
+    Kubernetes --> Docker
+    Docker --> AuthService
+    Docker --> UserService
+    Docker --> ClassService
+    Docker --> ChatService
+    Docker --> VideoService
+    Docker --> TaskService
+    Docker --> RankingService
+    Docker --> NotificationService
+```
